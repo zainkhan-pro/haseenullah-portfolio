@@ -2,6 +2,10 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import aboutHtml from "../public/site/about.html?raw";
+import experienceHtml from "../public/site/experience.html?raw";
+import certificationsHtml from "../public/site/certifications.html?raw";
+import contactHtml from "../public/site/contact.html?raw";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -107,14 +111,14 @@ function injectHomepageSeo(html: string): string {
 }
 
 const landingPages: Record<string, string> = {
-  "/about": "about",
-  "/about/": "about",
-  "/experience": "experience",
-  "/experience/": "experience",
-  "/certifications": "certifications",
-  "/certifications/": "certifications",
-  "/contact": "contact",
-  "/contact/": "contact",
+  "/about": aboutHtml,
+  "/about/": aboutHtml,
+  "/experience": experienceHtml,
+  "/experience/": experienceHtml,
+  "/certifications": certificationsHtml,
+  "/certifications/": certificationsHtml,
+  "/contact": contactHtml,
+  "/contact/": contactHtml,
 };
 
 export default {
@@ -135,8 +139,7 @@ export default {
 
       const landingPage = landingPages[url.pathname];
       if (landingPage) {
-        const page = await import(`../public/site/${landingPage}.html?raw`);
-        return new Response(page.default, {
+        return new Response(landingPage, {
           headers: { "content-type": "text/html; charset=utf-8" },
         });
       }
