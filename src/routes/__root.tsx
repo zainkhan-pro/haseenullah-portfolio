@@ -30,7 +30,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "canonical", href: siteUrl },
       { rel: "icon", type: "image/svg+xml", sizes: "any", href: "/hse-favicon.svg" },
-      { rel: "shortcut icon", href: "/hse-favicon.svg" },
+      { rel: "shortcut icon", type: "image/svg+xml", href: "/hse-favicon.svg" },
       { rel: "apple-touch-icon", href: "/hse-favicon.svg" },
       { rel: "stylesheet", href: appCss },
     ],
@@ -41,7 +41,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
-  return <html lang="en"><head><HeadContent /></head><body>{children}<Scripts /></body></html>;
+  return (
+    <html lang="en">
+      <head>
+        <link rel="icon" type="image/svg+xml" href="/hse-favicon.svg?v=3" />
+        <link rel="shortcut icon" type="image/svg+xml" href="/hse-favicon.svg?v=3" />
+        <HeadContent />
+      </head>
+      <body>{children}<Scripts /></body>
+    </html>
+  );
 }
 
 function RootComponent() {
