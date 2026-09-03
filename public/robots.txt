@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://haseenullah.hse.vercel.app/sitemap.xml
+Sitemap: https://haseenullah.vercel.app/sitemap.xml
