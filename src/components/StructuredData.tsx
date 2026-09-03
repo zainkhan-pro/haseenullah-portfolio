@@ -4,6 +4,7 @@ export function StructuredData() {
   const person = {
     "@context": "https://schema.org",
     "@type": "Person",
+    "@id": `${siteUrl}#person`,
     name: "Haseen Ullah",
     jobTitle: "HSE Officer / Safety Professional",
     url: siteUrl,
@@ -26,12 +27,20 @@ export function StructuredData() {
     mainEntity: { "@id": `${siteUrl}#person` },
   };
 
-  const personWithId = { ...person, "@id": `${siteUrl}#person` };
+  const website = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${siteUrl}#website`,
+    name: "Haseen Ullah | HSE Officer in Saudi Arabia",
+    url: siteUrl,
+    inLanguage: "en",
+  };
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personWithId) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(person) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(profilePage) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(website) }} />
     </>
   );
 }
