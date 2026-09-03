@@ -44,11 +44,22 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
+function injectHomepageSeo(html: string): string {
+  const seoHead =
+    '<link rel="canonical" href="https://haseenullah.vercel.app/" />' +
+    '<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />' +
+    '<meta property="og:url" content="https://haseenullah.vercel.app/" />' +
+    '<meta property="og:site_name" content="Haseen Ullah | HSE Officer" />' +
+    '<meta name="twitter:url" content="https://haseenullah.vercel.app/" />';
+
+  return html.replace("<head>", `<head>${seoHead}`);
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       // Keep the original portfolio design at the homepage.
-      // Inject the favicon into the legacy document because that static HTML
+      // Inject technical SEO tags into the legacy document because that static HTML
       // does not use TanStack Start's normal document head.
       const url = new URL(request.url);
       if (url.pathname === "/" || url.pathname === "/index.html") {
@@ -57,7 +68,7 @@ export default {
           '<link rel="icon" type="image/svg+xml" href="/hse-favicon.svg?v=4" />' +
           '<link rel="shortcut icon" type="image/svg+xml" href="/hse-favicon.svg?v=4" />' +
           '<link rel="apple-touch-icon" href="/hse-favicon.svg?v=4" />';
-        const html = siteHtml.default.replace("<head>", `<head>${faviconLinks}`);
+        const html = injectHomepageSeo(siteHtml.default.replace("<head>", `<head>${faviconLinks}`));
         return new Response(html, {
           headers: { "content-type": "text/html; charset=utf-8" },
         });
