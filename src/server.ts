@@ -50,6 +50,63 @@ function injectHomepageSeo(html: string): string {
   const title = "Haseen Ullah | HSE Officer | Saudi Arabia";
   const description =
     "Haseen Ullah is an HSE Officer and safety professional in Saudi Arabia with experience in construction, infrastructure and site safety.";
+  const responsiveFixes = `
+<style id="portfolio-responsive-fixes">
+/* Keep the original dark/yellow design, but make it stable at 100% browser zoom. */
+html { overflow-x: hidden; }
+body { overflow-x: hidden; }
+
+/* The original desktop navigation becomes too wide around laptop widths. Switch to
+   the existing hamburger control before the links can wrap or collide. */
+@media (min-width: 1024px) and (max-width: 1180px) {
+  header nav > div:nth-of-type(1) { display: none !important; }
+  header nav > div:last-child > button { display: flex !important; }
+  header nav { gap: 12px !important; }
+  header nav > a { min-width: 0; flex-shrink: 1; }
+  header nav > a > span:last-child { white-space: nowrap; }
+  header nav > div:last-child { flex-shrink: 0; }
+}
+
+/* Prevent the logo/name from creating a second line on medium desktop widths. */
+@media (min-width: 1181px) and (max-width: 1350px) {
+  header nav { padding-left: 20px !important; padding-right: 20px !important; }
+  header nav > div:nth-of-type(1) { gap: 20px !important; }
+  header nav > div:nth-of-type(1) a { white-space: nowrap; }
+  header nav > a { flex-shrink: 0; }
+  header nav > a > span:last-child { white-space: nowrap; }
+  header nav > div:last-child > a { padding-left: 16px !important; padding-right: 16px !important; }
+}
+
+/* Certificate viewer: keep the certificate completely visible at 90%, 100%,
+   and higher zoom levels instead of letting the image extend beyond the viewport. */
+body > div.fixed.inset-0,
+body > div[class*="fixed"][class*="inset-0"] {
+  overflow: auto !important;
+  box-sizing: border-box !important;
+  padding: 78px 16px 24px !important;
+}
+body > div.fixed.inset-0 img,
+body > div[class*="fixed"][class*="inset-0"] img {
+  max-width: min(100%, 1100px) !important;
+  max-height: calc(100vh - 110px) !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  margin: auto !important;
+}
+
+/* On smaller screens the certificate gets a little more breathing room. */
+@media (max-width: 767px) {
+  body > div.fixed.inset-0,
+  body > div[class*="fixed"][class*="inset-0"] {
+    padding: 72px 10px 16px !important;
+  }
+  body > div.fixed.inset-0 img,
+  body > div[class*="fixed"][class*="inset-0"] img {
+    max-height: calc(100vh - 90px) !important;
+  }
+}
+</style>`;
   const seoHead =
     '<link rel="canonical" href="https://haseenullah.vercel.app/" />' +
     '<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />' +
@@ -57,6 +114,7 @@ function injectHomepageSeo(html: string): string {
     '<meta property="og:site_name" content="Haseen Ullah" />' +
     '<meta property="og:type" content="profile" />' +
     '<meta name="twitter:url" content="https://haseenullah.vercel.app/" />' +
+    responsiveFixes +
     '<script type="application/ld+json">' +
     JSON.stringify({
       "@context": "https://schema.org",
