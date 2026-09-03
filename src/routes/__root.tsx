@@ -3,7 +3,7 @@ import { Outlet, Link, createRootRouteWithContext, HeadContent, Scripts } from "
 import { type ReactNode } from "react";
 import appCss from "../styles.css?url";
 
-const siteUrl = import.meta.env.VITE_SITE_URL || "https://haseenullah.hse.vercel.app";
+const siteUrl = import.meta.env.VITE_SITE_URL || "https://haseenullah.vercel.app";
 const title = "Haseen Ullah | HSE Officer in Saudi Arabia | Safety & HSE Professional";
 const description = "Haseen Ullah is an HSE Officer in Saudi Arabia with 5+ years of field experience across construction, infrastructure and energy projects, specializing in workplace safety, risk assessment, HIRA, Permit to Work and HSE compliance.";
 
