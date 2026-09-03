@@ -47,14 +47,6 @@ function isH3SwallowedErrorBody(body: string): boolean {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
-      // Serve the imported static portfolio site at the root path.
-      const url = new URL(request.url);
-      if (url.pathname === "/" || url.pathname === "/index.html") {
-        const siteHtml = await import("../public/site/index.html?raw");
-        return new Response(siteHtml.default, {
-          headers: { "content-type": "text/html; charset=utf-8" },
-        });
-      }
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
