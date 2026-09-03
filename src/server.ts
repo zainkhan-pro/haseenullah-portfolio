@@ -52,7 +52,13 @@ function injectHomepageSeo(html: string): string {
     '<meta property="og:site_name" content="Haseen Ullah | HSE Officer" />' +
     '<meta name="twitter:url" content="https://haseenullah.vercel.app/" />';
 
-  return html.replace("<head>", `<head>${seoHead}`);
+  const optimizedTitle = "Haseen Ullah | HSE Officer in Saudi Arabia | Safety & HSE Professional";
+
+  return html
+    .replace("<head>", `<head>${seoHead}`)
+    .replace(/<title>[^<]*<\/title>/, `<title>${optimizedTitle}</title>`)
+    .replace(/<meta property="og:title"[^>]*>/, `<meta property="og:title" content="${optimizedTitle}"/>`)
+    .replace(/<meta name="twitter:title"[^>]*>/, `<meta name="twitter:title" content="${optimizedTitle}">`);
 }
 
 export default {
