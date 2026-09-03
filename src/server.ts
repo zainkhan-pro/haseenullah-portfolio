@@ -52,41 +52,85 @@ function injectHomepageSeo(html: string): string {
     "Haseen Ullah is an HSE Officer and safety professional in Saudi Arabia with experience in construction, infrastructure and site safety.";
   const responsiveFixes = `
 <style id="portfolio-responsive-fixes">
-/* Preserve the original dark/yellow navigation and keep every desktop item visible. */
 html { overflow-x: hidden; }
 body { overflow-x: hidden; }
 
-/* At 100% zoom on laptop-sized desktop screens, tighten spacing rather than hiding
-   Profile, Certification, Certificates, Competencies, Field Kit, or Education. */
-@media (min-width: 1024px) and (max-width: 1350px) {
+/* Keep the complete original desktop navigation visible at 100% zoom.
+   Nothing is replaced by the hamburger menu on desktop. */
+@media (min-width: 900px) {
   header nav {
     padding-left: 18px !important;
     padding-right: 18px !important;
     gap: 10px !important;
+    flex-wrap: nowrap !important;
+    overflow: visible !important;
   }
-  header nav > a { flex-shrink: 0; }
+  header nav > a { flex: 0 0 auto !important; }
   header nav > a > span:last-child {
-    white-space: nowrap;
+    white-space: nowrap !important;
     font-size: 14px !important;
   }
   header nav > div:nth-of-type(1) {
-    gap: 15px !important;
-    flex: 1 1 auto !important;
+    display: flex !important;
+    align-items: center !important;
     justify-content: center !important;
+    gap: clamp(10px, 1.25vw, 20px) !important;
+    flex: 1 1 auto !important;
     min-width: 0 !important;
+    white-space: nowrap !important;
   }
   header nav > div:nth-of-type(1) a {
+    display: inline-flex !important;
     white-space: nowrap !important;
-    font-size: 11px !important;
-    letter-spacing: .08em !important;
+    flex: 0 0 auto !important;
+    font-size: clamp(10px, .82vw, 13px) !important;
+    letter-spacing: .07em !important;
   }
   header nav > div:last-child {
-    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    flex: 0 0 auto !important;
+    gap: 8px !important;
   }
   header nav > div:last-child > a {
+    display: inline-flex !important;
     padding-left: 13px !important;
     padding-right: 13px !important;
+    white-space: nowrap !important;
   }
+  header nav > div:last-child > button {
+    display: none !important;
+  }
+}
+
+/* On narrower screens, keep the full navigation instead of showing the three-line menu.
+   The bar can scroll horizontally when necessary. */
+@media (max-width: 899px) {
+  header nav {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    gap: 12px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    justify-content: flex-start !important;
+    scrollbar-width: none !important;
+  }
+  header nav::-webkit-scrollbar { display: none !important; }
+  header nav > a { flex: 0 0 auto !important; }
+  header nav > div:nth-of-type(1) {
+    display: flex !important;
+    flex: 0 0 auto !important;
+    gap: 14px !important;
+    white-space: nowrap !important;
+  }
+  header nav > div:nth-of-type(1) a {
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+  }
+  header nav > div:last-child { flex: 0 0 auto !important; }
+  header nav > div:last-child > button { display: none !important; }
+  header nav > div:last-child > a { display: inline-flex !important; white-space: nowrap !important; }
 }
 
 /* Certificate viewer: fit the complete certificate inside the viewport. */
