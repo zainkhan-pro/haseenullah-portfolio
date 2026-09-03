@@ -8,67 +8,43 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
-
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
+
+const siteUrl = import.meta.env.VITE_SITE_URL || "https://haseenullah.hse.vercel.app";
+const title = "Haseen Ullah | HSE Officer in Saudi Arabia | Safety & HSE Professional";
+const description =
+  "Haseen Ullah is an HSE Officer in Saudi Arabia with 5+ years of field experience across construction, infrastructure and energy projects, specializing in workplace safety, risk assessment, HIRA, Permit to Work and HSE compliance.";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <main className="flex min-h-screen items-center justify-center px-6">
       <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
-        </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Go home
-          </Link>
-        </div>
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">404</p>
+        <h1 className="mt-3 text-4xl font-bold tracking-tight">Page not found</h1>
+        <p className="mt-3 text-muted-foreground">The requested page does not exist.</p>
+        <Link to="/" className="mt-7 inline-flex rounded-md bg-primary px-5 py-3 font-semibold text-primary-foreground">
+          Return to Haseen Ullah’s portfolio
+        </Link>
       </div>
-    </div>
+    </main>
   );
 }
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
-
+  useEffect(() => reset, [reset]);
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <main className="flex min-h-screen items-center justify-center px-6">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
-        </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
-            onClick={() => {
-              router.invalidate();
-              reset();
-            }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Try again
-          </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          >
-            Go home
-          </a>
+        <h1 className="text-2xl font-bold">This page didn’t load</h1>
+        <p className="mt-3 text-muted-foreground">Something went wrong. Please refresh and try again.</p>
+        <div className="mt-7 flex justify-center gap-3">
+          <button onClick={() => { router.invalidate(); reset(); }} className="rounded-md bg-primary px-5 py-3 font-semibold text-primary-foreground">Try again</button>
+          <Link to="/" className="rounded-md border px-5 py-3 font-semibold">Go home</Link>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -77,27 +53,24 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Haseen Ullah — NEBOSH Certified Safety Officer" },
-      {
-        name: "description",
-        content:
-          "HSE professional committed to protecting people and strengthening operations — hazard identification, risk assessment and a safety-first culture on every site.",
-      },
+      { title },
+      { name: "description", content: description },
       { name: "author", content: "Haseen Ullah" },
-      { property: "og:title", content: "Haseen Ullah — NEBOSH Certified Safety Officer" },
-      {
-        property: "og:description",
-        content:
-          "Health, Safety & Environment professional available for Safety Officer and HSE compliance roles.",
-      },
-      { property: "og:type", content: "website" },
+      { name: "robots", content: "index, follow, max-image-preview:large" },
+      { property: "og:title", content: title },
+      { property: "og:description", content: description },
+      { property: "og:type", content: "profile" },
+      { property: "og:url", content: siteUrl },
+      { property: "og:site_name", content: "Haseen Ullah | HSE Officer" },
+      { property: "og:image", content: `${siteUrl}/og-image.jpg` },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: title },
+      { name: "twitter:description", content: description },
+      { name: "twitter:image", content: `${siteUrl}/og-image.jpg` },
     ],
     links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
+      { rel: "canonical", href: siteUrl },
+      { rel: "stylesheet", href: appCss },
     ],
   }),
   shellComponent: RootShell,
@@ -109,24 +82,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        {children}
-        <Scripts />
-      </body>
+      <head><HeadContent /></head>
+      <body>{children}<Scripts /></body>
     </html>
   );
 }
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-
-  return (
-    <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
-    </QueryClientProvider>
-  );
+  return <QueryClientProvider client={queryClient}><Outlet /></QueryClientProvider>;
 }
