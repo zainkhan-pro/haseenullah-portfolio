@@ -1,4 +1,4 @@
-const siteUrl = import.meta.env.VITE_SITE_URL || "https://haseenullah.hse.vercel.app";
+const siteUrl = import.meta.env.VITE_SITE_URL || "https://haseenullah.vercel.app";
 
 export function StructuredData() {
   const person = {
