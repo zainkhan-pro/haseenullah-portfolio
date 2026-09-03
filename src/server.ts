@@ -47,11 +47,18 @@ function isH3SwallowedErrorBody(body: string): boolean {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
-      // Restore the original portfolio design at the homepage.
+      // Keep the original portfolio design at the homepage.
+      // Inject the favicon into the legacy document because that static HTML
+      // does not use TanStack Start's normal document head.
       const url = new URL(request.url);
       if (url.pathname === "/" || url.pathname === "/index.html") {
         const siteHtml = await import("../public/site/index.html?raw");
-        return new Response(siteHtml.default, {
+        const faviconLinks =
+          '<link rel="icon" type="image/svg+xml" href="/hse-favicon.svg?v=4" />' +
+          '<link rel="shortcut icon" type="image/svg+xml" href="/hse-favicon.svg?v=4" />' +
+          '<link rel="apple-touch-icon" href="/hse-favicon.svg?v=4" />';
+        const html = siteHtml.default.replace("<head>", `<head>${faviconLinks}`);
+        return new Response(html, {
           headers: { "content-type": "text/html; charset=utf-8" },
         });
       }
