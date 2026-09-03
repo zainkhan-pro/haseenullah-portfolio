@@ -7,6 +7,8 @@ const siteUrl = import.meta.env.VITE_SITE_URL || "https://haseenullah.vercel.app
 const title = "Haseen Ullah | HSE Officer in Saudi Arabia | Safety & HSE Professional";
 const description = "Haseen Ullah is an HSE Officer in Saudi Arabia with 5+ years of field experience across construction, infrastructure and energy projects, specializing in workplace safety, risk assessment, HIRA, Permit to Work and HSE compliance.";
 
+const faviconDataUri = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230f172a'/%3E%3Cpath d='M18 16h8v13h12V16h8v32h-8V37H26v11h-8z' fill='%23f59e0b'/%3E%3C/svg%3E";
+
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
     meta: [
@@ -29,9 +31,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "canonical", href: siteUrl },
-      { rel: "icon", type: "image/svg+xml", sizes: "any", href: "/hse-favicon.svg" },
-      { rel: "shortcut icon", type: "image/svg+xml", href: "/hse-favicon.svg" },
-      { rel: "apple-touch-icon", href: "/hse-favicon.svg" },
+      { rel: "icon", type: "image/svg+xml", sizes: "any", href: faviconDataUri },
+      { rel: "shortcut icon", type: "image/svg+xml", href: faviconDataUri },
+      { rel: "apple-touch-icon", href: "/hse-favicon.svg?v=4" },
       { rel: "stylesheet", href: appCss },
     ],
   }),
@@ -44,8 +46,8 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
-        <link rel="icon" type="image/svg+xml" href="/hse-favicon.svg?v=3" />
-        <link rel="shortcut icon" type="image/svg+xml" href="/hse-favicon.svg?v=3" />
+        <link rel="icon" type="image/svg+xml" href={faviconDataUri} />
+        <link rel="shortcut icon" type="image/svg+xml" href={faviconDataUri} />
         <HeadContent />
       </head>
       <body>{children}<Scripts /></body>
