@@ -52,33 +52,44 @@ function injectHomepageSeo(html: string): string {
     "Haseen Ullah is an HSE Officer and safety professional in Saudi Arabia with experience in construction, infrastructure and site safety.";
   const responsiveFixes = `
 <style id="portfolio-responsive-fixes">
-/* Keep the original dark/yellow design, but make it stable at 100% browser zoom. */
+/* Preserve the original dark/yellow navigation and keep every desktop item visible. */
 html { overflow-x: hidden; }
 body { overflow-x: hidden; }
 
-/* The original desktop navigation becomes too wide around laptop widths. Switch to
-   the existing hamburger control before the links can wrap or collide. */
-@media (min-width: 1024px) and (max-width: 1180px) {
-  header nav > div:nth-of-type(1) { display: none !important; }
-  header nav > div:last-child > button { display: flex !important; }
-  header nav { gap: 12px !important; }
-  header nav > a { min-width: 0; flex-shrink: 1; }
-  header nav > a > span:last-child { white-space: nowrap; }
-  header nav > div:last-child { flex-shrink: 0; }
-}
-
-/* Prevent the logo/name from creating a second line on medium desktop widths. */
-@media (min-width: 1181px) and (max-width: 1350px) {
-  header nav { padding-left: 20px !important; padding-right: 20px !important; }
-  header nav > div:nth-of-type(1) { gap: 20px !important; }
-  header nav > div:nth-of-type(1) a { white-space: nowrap; }
+/* At 100% zoom on laptop-sized desktop screens, tighten spacing rather than hiding
+   Profile, Certification, Certificates, Competencies, Field Kit, or Education. */
+@media (min-width: 1024px) and (max-width: 1350px) {
+  header nav {
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+    gap: 10px !important;
+  }
   header nav > a { flex-shrink: 0; }
-  header nav > a > span:last-child { white-space: nowrap; }
-  header nav > div:last-child > a { padding-left: 16px !important; padding-right: 16px !important; }
+  header nav > a > span:last-child {
+    white-space: nowrap;
+    font-size: 14px !important;
+  }
+  header nav > div:nth-of-type(1) {
+    gap: 15px !important;
+    flex: 1 1 auto !important;
+    justify-content: center !important;
+    min-width: 0 !important;
+  }
+  header nav > div:nth-of-type(1) a {
+    white-space: nowrap !important;
+    font-size: 11px !important;
+    letter-spacing: .08em !important;
+  }
+  header nav > div:last-child {
+    flex-shrink: 0 !important;
+  }
+  header nav > div:last-child > a {
+    padding-left: 13px !important;
+    padding-right: 13px !important;
+  }
 }
 
-/* Certificate viewer: keep the certificate completely visible at 90%, 100%,
-   and higher zoom levels instead of letting the image extend beyond the viewport. */
+/* Certificate viewer: fit the complete certificate inside the viewport. */
 body > div.fixed.inset-0,
 body > div[class*="fixed"][class*="inset-0"] {
   overflow: auto !important;
@@ -95,7 +106,6 @@ body > div[class*="fixed"][class*="inset-0"] img {
   margin: auto !important;
 }
 
-/* On smaller screens the certificate gets a little more breathing room. */
 @media (max-width: 767px) {
   body > div.fixed.inset-0,
   body > div[class*="fixed"][class*="inset-0"] {
