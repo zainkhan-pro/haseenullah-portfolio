@@ -18,8 +18,6 @@ async function getServerEntry(): Promise<ServerEntry> {
   return serverEntryPromise;
 }
 
-// h3 swallows in-handler throws into a normal 500 Response with body
-// {"unhandled":true,"message":"HTTPError"} — try/catch alone never fires for those.
 async function normalizeCatastrophicSsrResponse(response: Response): Promise<Response> {
   if (response.status < 500) return response;
   const contentType = response.headers.get("content-type") ?? "";
@@ -45,28 +43,73 @@ function isH3SwallowedErrorBody(body: string): boolean {
 }
 
 function injectHomepageSeo(html: string): string {
+  const title = "Haseen Ullah | HSE Officer | Saudi Arabia";
+  const description =
+    "Haseen Ullah is an HSE Officer and safety professional in Saudi Arabia with experience in construction, infrastructure and site safety.";
   const seoHead =
     '<link rel="canonical" href="https://haseenullah.vercel.app/" />' +
     '<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />' +
     '<meta property="og:url" content="https://haseenullah.vercel.app/" />' +
-    '<meta property="og:site_name" content="Haseen Ullah | HSE Officer" />' +
-    '<meta name="twitter:url" content="https://haseenullah.vercel.app/" />';
+    '<meta property="og:site_name" content="Haseen Ullah" />' +
+    '<meta property="og:type" content="profile" />' +
+    '<meta name="twitter:url" content="https://haseenullah.vercel.app/" />' +
+    '<meta name="twitter:site" content="@haseenullah" />' +
+    '<script type="application/ld+json">' +
+    JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "ProfilePage",
+      "@id": "https://haseenullah.vercel.app/#profilepage",
+      "url": "https://haseenullah.vercel.app/",
+      "name": title,
+      "mainEntity": {
+        "@type": "Person",
+        "@id": "https://haseenullah.vercel.app/#person",
+        "name": "Haseen Ullah",
+        "jobTitle": "HSE Officer",
+        "url": "https://haseenullah.vercel.app/",
+        "email": "malikhaseen456@gmail.com",
+        "telephone": "+966 534 023 691",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Al Wajh",
+          "addressRegion": "Tabuk",
+          "addressCountry": "SA"
+        },
+        "sameAs": ["https://www.linkedin.com/in/haseen-ullah-hse"],
+        "knowsAbout": [
+          "Health and Safety",
+          "HSE Compliance",
+          "Risk Assessment",
+          "Hazard Identification",
+          "Incident Investigation",
+          "Safety Audits",
+          "Toolbox Talks",
+          "Emergency Response",
+          "PPE and Hazard Control"
+        ]
+      }
+    }) +
+    '</script>';
 
-  const optimizedTitle = "Haseen Ullah | HSE Officer in Saudi Arabia | Safety & HSE Professional";
-
-  return html
+  let result = html
     .replace("<head>", `<head>${seoHead}`)
-    .replace(/<title>[^<]*<\/title>/, `<title>${optimizedTitle}</title>`)
-    .replace(/<meta property="og:title"[^>]*>/, `<meta property="og:title" content="${optimizedTitle}"/>`)
-    .replace(/<meta name="twitter:title"[^>]*>/, `<meta name="twitter:title" content="${optimizedTitle}">`);
+    .replace(/<title>[^<]*<\/title>/, `<title>${title}</title>`)
+    .replace(/<meta name="description"[^>]*>/, `<meta name="description" content="${description}">`)
+    .replace(/<meta property="og:title"[^>]*>/, `<meta property="og:title" content="${title}">`)
+    .replace(/<meta property="og:description"[^>]*>/, `<meta property="og:description" content="${description}">`)
+    .replace(/<meta name="twitter:title"[^>]*>/, `<meta name="twitter:title" content="${title}">`)
+    .replace(/<meta name="twitter:description"[^>]*>/, `<meta name="twitter:description" content="${description}">`);
+
+  result = result.replace(/<img(?![^>]*\bwidth=)([^>]*aspect-square[^>]*)>/g, '<img width="800" height="800"$1>');
+  result = result.replace(/<img(?![^>]*\bwidth=)([^>]*aspect-\[4\/3\][^>]*)>/g, '<img width="800" height="600"$1>');
+  result = result.replace(/<img(?![^>]*\bwidth=)([^>]*)>/g, '<img width="1200" height="800"$1>');
+
+  return result;
 }
 
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
-      // Keep the original portfolio design at the homepage.
-      // Inject technical SEO tags into the legacy document because that static HTML
-      // does not use TanStack Start's normal document head.
       const url = new URL(request.url);
       if (url.pathname === "/" || url.pathname === "/index.html") {
         const siteHtml = await import("../public/site/index.html?raw");
