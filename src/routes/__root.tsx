@@ -29,8 +29,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "canonical", href: siteUrl },
-      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
-      { rel: "shortcut icon", href: "/favicon.svg" },
+      { rel: "icon", type: "image/svg+xml", sizes: "any", href: "/favicon.svg?v=2" },
+      { rel: "shortcut icon", type: "image/svg+xml", href: "/favicon.svg?v=2" },
+      { rel: "apple-touch-icon", href: "/favicon.svg?v=2" },
       { rel: "stylesheet", href: appCss },
     ],
   }),
