@@ -106,6 +106,17 @@ function injectHomepageSeo(html: string): string {
   return result;
 }
 
+const landingPages: Record<string, string> = {
+  "/about": "about",
+  "/about/": "about",
+  "/experience": "experience",
+  "/experience/": "experience",
+  "/certifications": "certifications",
+  "/certifications/": "certifications",
+  "/contact": "contact",
+  "/contact/": "contact",
+};
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
@@ -121,6 +132,15 @@ export default {
           headers: { "content-type": "text/html; charset=utf-8" },
         });
       }
+
+      const landingPage = landingPages[url.pathname];
+      if (landingPage) {
+        const page = await import(`../public/site/${landingPage}.html?raw`);
+        return new Response(page.default, {
+          headers: { "content-type": "text/html; charset=utf-8" },
+        });
+      }
+
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
