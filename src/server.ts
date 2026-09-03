@@ -53,7 +53,6 @@ function injectHomepageSeo(html: string): string {
     '<meta property="og:site_name" content="Haseen Ullah" />' +
     '<meta property="og:type" content="profile" />' +
     '<meta name="twitter:url" content="https://haseenullah.vercel.app/" />' +
-    '<meta name="twitter:site" content="@haseenullah" />' +
     '<script type="application/ld+json">' +
     JSON.stringify({
       "@context": "https://schema.org",
