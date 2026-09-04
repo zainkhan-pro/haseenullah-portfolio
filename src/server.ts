@@ -29,7 +29,10 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   const body = await response.clone().text();
   if (!isH3SwallowedErrorBody(body)) return response;
   console.error(consumeLastCapturedError() ?? new Error(`h3 swallowed SSR error: ${body}`));
-  return new Response(renderErrorPage(), { status: 500, headers: { "content-type": "text/html; charset=utf-8" } });
+  return new Response(renderErrorPage(), {
+    status: 500,
+    headers: { "content-type": "text/html; charset=utf-8" },
+  });
 }
 
 function isH3SwallowedErrorBody(body: string): boolean {
@@ -43,10 +46,11 @@ function isH3SwallowedErrorBody(body: string): boolean {
 
 function injectHomepageSeo(html: string): string {
   const title = "Haseen Ullah | HSE Officer | Saudi Arabia";
-  const description = "Haseen Ullah is an HSE Officer and safety professional in Saudi Arabia with experience in construction, infrastructure and site safety.";
+  const description =
+    "Haseen Ullah is an HSE Officer and safety professional in Saudi Arabia with experience in construction, infrastructure and site safety.";
 
   const fixes = `
-<style id="portfolio-final-fixes-v5">
+<style id="portfolio-final-fixes-v6">
 html, body { overflow-x: hidden; }
 
 @media (min-width: 1024px) {
@@ -117,12 +121,29 @@ html, body { overflow-x: hidden; }
   }
   header nav > div:last-child > button { display: none !important; }
   main section[id] { scroll-margin-top: 96px !important; }
+
+  /* Contact: use the full viewport instead of leaving the cards stuck at the top. */
   main section#contact {
-    padding-top: 132px !important;
-    padding-bottom: 72px !important;
+    min-height: calc(100vh - 88px) !important;
+    box-sizing: border-box !important;
+    padding-top: 96px !important;
+    padding-bottom: 96px !important;
+    display: flex !important;
+    align-items: center !important;
   }
-  main section#contact > div { transform: translateY(24px) !important; }
-  main section#contact .grid { align-items: start !important; }
+  main section#contact > div {
+    width: 100% !important;
+    transform: none !important;
+  }
+  main section#contact > div > .reveal:first-child {
+    margin-top: 0 !important;
+  }
+  main section#contact .grid {
+    align-items: center !important;
+  }
+  main section#contact .grid > * {
+    align-self: center !important;
+  }
 }
 
 @media (max-width: 1023px) {
@@ -137,9 +158,24 @@ html, body { overflow-x: hidden; }
   header nav > a { flex: 0 0 auto !important; min-width: 0 !important; }
   header nav > a > span:last-child { white-space: nowrap !important; }
   header nav > div:nth-of-type(1) { display: none !important; }
-  header nav > div:last-child { display: flex !important; align-items: center !important; margin-left: auto !important; flex: 0 0 auto !important; gap: 8px !important; }
+  header nav > div:last-child {
+    display: flex !important;
+    align-items: center !important;
+    margin-left: auto !important;
+    flex: 0 0 auto !important;
+    gap: 8px !important;
+  }
   header nav > div:last-child > a { display: none !important; }
-  header nav > div:last-child > button { display: flex !important; align-items: center !important; justify-content: center !important; width: 44px !important; height: 44px !important; flex: 0 0 44px !important; margin: 0 !important; padding: 0 !important; }
+  header nav > div:last-child > button {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 44px !important;
+    height: 44px !important;
+    flex: 0 0 44px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
   main { width: 100% !important; max-width: 100% !important; overflow-x: hidden !important; }
   main section { max-width: 100% !important; }
 }
@@ -328,16 +364,26 @@ export default {
           '<link rel="shortcut icon" type="image/svg+xml" href="/hse-favicon.svg?v=5" />' +
           '<link rel="apple-touch-icon" href="/hse-favicon.svg?v=5" />';
         const html = injectHomepageSeo(siteHtml.default.replace("<head>", `<head>${faviconLinks}`));
-        return new Response(html, { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store, max-age=0" } });
+        return new Response(html, {
+          headers: {
+            "content-type": "text/html; charset=utf-8",
+            "cache-control": "no-store, max-age=0",
+          },
+        });
       }
       const landingPage = landingPages[url.pathname];
-      if (landingPage) return new Response(landingPage, { headers: { "content-type": "text/html; charset=utf-8" } });
+      if (landingPage) {
+        return new Response(landingPage, { headers: { "content-type": "text/html; charset=utf-8" } });
+      }
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
     } catch (error) {
       console.error(error);
-      return new Response(renderErrorPage(), { status: 500, headers: { "content-type": "text/html; charset=utf-8" } });
+      return new Response(renderErrorPage(), {
+        status: 500,
+        headers: { "content-type": "text/html; charset=utf-8" },
+      });
     }
   },
 };
