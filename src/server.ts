@@ -36,14 +36,16 @@ function injectHomepageSeo(html: string): string {
   const title = "Haseen Ullah | HSE Officer | Saudi Arabia";
   const description = "Haseen Ullah is an HSE Officer and safety professional in Saudi Arabia with experience in construction, infrastructure and site safety.";
   const fixes = `
-<style id="portfolio-final-fixes-v9">
+<style id="portfolio-final-fixes-v10">
 html,body{overflow-x:hidden}
 
-/* Keep the original navbar layout intact; only add the active/focus treatment. */
+/* Preserve the original typography and navbar style; only improve spacing/alignment. */
 @media (min-width:1024px){
-header nav>div:nth-of-type(1) a{position:relative!important}
+header nav>div:nth-of-type(1){display:flex!important;align-items:center!important;justify-content:center!important;gap:30px!important;min-width:0!important;flex:1 1 auto!important;margin-left:24px!important;margin-right:24px!important}
+header nav>div:nth-of-type(1) a{position:relative!important;white-space:nowrap!important;flex:0 0 auto!important}
 header nav>div:nth-of-type(1) a:hover,header nav>div:nth-of-type(1) a.is-active{color:#facc15!important;text-shadow:0 0 14px rgba(250,204,21,.28)!important}
-header nav>div:nth-of-type(1) a.is-active:after{content:''!important;position:absolute!important;left:0!important;right:0!important;bottom:3px!important;height:2px!important;border-radius:999px!important;background:#facc15!important;box-shadow:0 0 10px rgba(250,204,21,.4)!important}
+header nav>div:nth-of-type(1) a.is-active:after{content:''!important;position:absolute!important;left:0!important;right:0!important;bottom:-6px!important;height:2px!important;border-radius:999px!important;background:#facc15!important;box-shadow:0 0 10px rgba(250,204,21,.4)!important}
+header nav>div:last-child{flex:0 0 auto!important}
 main section[id]{scroll-margin-top:88px!important}
 
 /* Contact section matches the reference: two cards in one row, full-width CTA below. */
