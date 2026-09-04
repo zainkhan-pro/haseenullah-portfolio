@@ -84,9 +84,18 @@ body { overflow-x: hidden; }
     align-items: center !important;
     white-space: nowrap !important;
     flex: 0 0 auto !important;
-    font-size: clamp(10px, .78vw, 13px) !important;
+    font-size: clamp(11px, .82vw, 14px) !important;
+    font-weight: 600 !important;
     letter-spacing: .065em !important;
     line-height: 1 !important;
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+    transition: color .2s ease, text-shadow .2s ease !important;
+  }
+  header nav > div:nth-of-type(1) a:hover,
+  header nav > div:nth-of-type(1) a.is-active {
+    color: #facc15 !important;
+    text-shadow: 0 0 18px rgba(250, 204, 21, .18) !important;
   }
   header nav > div:last-child {
     display: flex !important;
@@ -115,6 +124,11 @@ body { overflow-x: hidden; }
   }
   main section#contact .grid {
     align-items: start !important;
+  }
+
+  /* Keep anchored sections clear of the fixed desktop header. */
+  main section[id] {
+    scroll-margin-top: 92px !important;
   }
 }
 
@@ -213,7 +227,55 @@ body > div[class*="fixed"][class*="inset-0"] img {
     max-height: calc(100vh - 90px) !important;
   }
 }
-</style>`;
+</style>
+<script>
+(function () {
+  function initPortfolioNav() {
+    var links = Array.prototype.slice.call(document.querySelectorAll('header nav > div:nth-of-type(1) a[href^="#"]'));
+    if (!links.length) return;
+
+    var setActive = function (id) {
+      links.forEach(function (link) {
+        var active = link.getAttribute('href') === '#' + id;
+        link.classList.toggle('is-active', active);
+        if (active) link.setAttribute('aria-current', 'page');
+        else link.removeAttribute('aria-current');
+      });
+    };
+
+    links.forEach(function (link) {
+      link.addEventListener('click', function () {
+        var target = link.getAttribute('href');
+        if (target && target.charAt(0) === '#') setActive(target.slice(1));
+      });
+    });
+
+    if ('IntersectionObserver' in window) {
+      var sections = links.map(function (link) {
+        return document.getElementById(link.getAttribute('href').slice(1));
+      }).filter(Boolean);
+
+      var observer = new IntersectionObserver(function (entries) {
+        var visible = entries.filter(function (entry) { return entry.isIntersecting; });
+        if (!visible.length) return;
+        visible.sort(function (a, b) { return b.intersectionRatio - a.intersectionRatio; });
+        setActive(visible[0].target.id);
+      }, { rootMargin: '-28% 0px -58% 0px', threshold: [0.05, 0.2, 0.5] });
+
+      sections.forEach(function (section) { observer.observe(section); });
+    }
+
+    var initial = window.location.hash ? window.location.hash.slice(1) : 'profile';
+    setActive(initial || 'profile');
+    window.addEventListener('hashchange', function () {
+      setActive(window.location.hash.slice(1) || 'profile');
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initPortfolioNav);
+  else initPortfolioNav();
+})();
+</script>`;
   const seoHead =
     '<link rel="canonical" href="https://haseenullah.vercel.app/" />' +
     '<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />' +
