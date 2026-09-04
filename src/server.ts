@@ -104,6 +104,18 @@ body { overflow-x: hidden; }
   header nav > div:last-child > button {
     display: none !important;
   }
+
+  /* Desktop contact composition: move the cards down into the visual center and remove the large empty lower area. */
+  main section#contact {
+    padding-top: 132px !important;
+    padding-bottom: 72px !important;
+  }
+  main section#contact > div {
+    transform: translateY(24px) !important;
+  }
+  main section#contact .grid {
+    align-items: start !important;
+  }
 }
 
 /* Mobile/narrow: hide the desktop links and show the original hamburger button. */
