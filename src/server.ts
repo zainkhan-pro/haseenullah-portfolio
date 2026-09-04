@@ -46,7 +46,7 @@ function injectHomepageSeo(html: string): string {
   const description = "Haseen Ullah is an HSE Officer and safety professional in Saudi Arabia with experience in construction, infrastructure and site safety.";
 
   const fixes = `
-<style id="portfolio-final-fixes">
+<style id="portfolio-final-fixes-v5">
 html, body { overflow-x: hidden; }
 
 @media (min-width: 1024px) {
@@ -116,9 +116,7 @@ html, body { overflow-x: hidden; }
     white-space: nowrap !important;
   }
   header nav > div:last-child > button { display: none !important; }
-
   main section[id] { scroll-margin-top: 96px !important; }
-
   main section#contact {
     padding-top: 132px !important;
     padding-bottom: 72px !important;
@@ -176,62 +174,90 @@ body > div[class*="fixed"][class*="inset-0"] img {
 </style>
 <script>
 (function () {
-  function setupNavigation() {
+  var sectionIds = ['profile','certification','certificates','competencies','fieldkit','education'];
+  var started = false;
+
+  function getLinks() {
     var nav = document.querySelector('header nav');
-    if (!nav) return;
-    var links = Array.prototype.slice.call(nav.querySelectorAll('a[href^="#"]')).filter(function (a) {
-      return a.closest('div') && a.closest('div') !== nav;
+    if (!nav) return [];
+    return Array.prototype.slice.call(nav.querySelectorAll('a[href^="#"]')).filter(function (a) {
+      return sectionIds.indexOf((a.getAttribute('href') || '').slice(1)) !== -1;
     });
-    var sectionIds = ['profile','certification','certificates','competencies','fieldkit','education'];
-    links = links.filter(function (a) { return sectionIds.indexOf((a.getAttribute('href') || '').slice(1)) !== -1; });
-    if (!links.length) return;
+  }
 
-    function activate(id) {
-      links.forEach(function (link) {
-        var active = (link.getAttribute('href') || '').slice(1) === id;
-        link.classList.toggle('is-active', active);
-        if (active) link.setAttribute('aria-current', 'location');
-        else link.removeAttribute('aria-current');
-      });
-    }
-
-    links.forEach(function (link) {
-      link.addEventListener('click', function (event) {
-        var id = (link.getAttribute('href') || '').slice(1);
-        var target = document.getElementById(id);
-        if (!target) return;
-        event.preventDefault();
-        activate(id);
-        var y = target.getBoundingClientRect().top + window.pageYOffset - 92;
-        window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
-        try { history.pushState(null, '', '#' + id); } catch (e) {}
-      });
+  function activate(id) {
+    getLinks().forEach(function (link) {
+      var active = (link.getAttribute('href') || '').slice(1) === id;
+      link.classList.toggle('is-active', active);
+      if (active) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
     });
+  }
 
-    function updateFromScroll() {
-      var bestId = 'profile';
-      var bestDistance = Infinity;
-      sectionIds.forEach(function (id) {
-        var section = document.getElementById(id);
-        if (!section) return;
-        var distance = Math.abs(section.getBoundingClientRect().top - 105);
-        if (section.getBoundingClientRect().top <= 170 && distance < bestDistance) {
+  function scrollToSection(id, smooth) {
+    var target = document.getElementById(id);
+    if (!target) return false;
+    activate(id);
+    var y = target.getBoundingClientRect().top + window.pageYOffset - 92;
+    window.scrollTo({ top: Math.max(0, y), behavior: smooth ? 'smooth' : 'auto' });
+    return true;
+  }
+
+  function updateFromScroll() {
+    var bestId = 'profile';
+    var bestDistance = Infinity;
+    sectionIds.forEach(function (id) {
+      var section = document.getElementById(id);
+      if (!section) return;
+      var top = section.getBoundingClientRect().top;
+      if (top <= 180) {
+        var distance = Math.abs(top - 105);
+        if (distance < bestDistance) {
           bestDistance = distance;
           bestId = id;
         }
-      });
-      activate(bestId);
-    }
+      }
+    });
+    activate(bestId);
+  }
+
+  function setup() {
+    if (started) return;
+    if (!document.querySelector('header nav')) return;
+    started = true;
+
+    document.addEventListener('click', function (event) {
+      var el = event.target;
+      if (!el || !el.closest) return;
+      var link = el.closest('header nav a[href^="#"]');
+      if (!link) return;
+      var id = (link.getAttribute('href') || '').slice(1);
+      if (sectionIds.indexOf(id) === -1 || !document.getElementById(id)) return;
+      event.preventDefault();
+      scrollToSection(id, true);
+      try { history.replaceState(null, '', '#' + id); } catch (e) {}
+    }, true);
 
     var hash = (window.location.hash || '').slice(1);
-    activate(sectionIds.indexOf(hash) >= 0 ? hash : 'profile');
+    if (sectionIds.indexOf(hash) !== -1 && document.getElementById(hash)) scrollToSection(hash, false);
+    else activate('profile');
+
     window.addEventListener('scroll', updateFromScroll, { passive: true });
-    window.addEventListener('hashchange', function () { activate((window.location.hash || '').slice(1) || 'profile'); });
+    window.addEventListener('hashchange', function () {
+      var id = (window.location.hash || '').slice(1);
+      if (sectionIds.indexOf(id) !== -1) scrollToSection(id, true);
+    });
     updateFromScroll();
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupNavigation);
-  else setupNavigation();
+  function boot() {
+    setup();
+    if (!started) setTimeout(boot, 100);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+  window.addEventListener('load', boot);
 })();
 </script>`;
 
@@ -298,11 +324,11 @@ export default {
       if (url.pathname === "/" || url.pathname === "/index.html") {
         const siteHtml = await import("../public/site/index.html?raw");
         const faviconLinks =
-          '<link rel="icon" type="image/svg+xml" href="/hse-favicon.svg?v=4" />' +
-          '<link rel="shortcut icon" type="image/svg+xml" href="/hse-favicon.svg?v=4" />' +
-          '<link rel="apple-touch-icon" href="/hse-favicon.svg?v=4" />';
+          '<link rel="icon" type="image/svg+xml" href="/hse-favicon.svg?v=5" />' +
+          '<link rel="shortcut icon" type="image/svg+xml" href="/hse-favicon.svg?v=5" />' +
+          '<link rel="apple-touch-icon" href="/hse-favicon.svg?v=5" />';
         const html = injectHomepageSeo(siteHtml.default.replace("<head>", `<head>${faviconLinks}`));
-        return new Response(html, { headers: { "content-type": "text/html; charset=utf-8" } });
+        return new Response(html, { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store, max-age=0" } });
       }
       const landingPage = landingPages[url.pathname];
       if (landingPage) return new Response(landingPage, { headers: { "content-type": "text/html; charset=utf-8" } });
