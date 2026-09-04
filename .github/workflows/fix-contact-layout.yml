@@ -1,0 +1,68 @@
+name: Fix contact layout
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  fix-contact-layout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch desktop contact layout
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path("src/server.ts")
+          s = p.read_text(encoding="utf-8")
+          old = '''  main section#contact {
+    padding-top: 132px !important;
+    padding-bottom: 72px !important;
+  }
+  main section#contact > div { transform: translateY(24px) !important; }
+  main section#contact .grid { align-items: start !important; }'''
+          new = '''  /* Desktop contact area: vertically center the three cards so they do not hug the top and leave a large empty lower area. */
+  main section#contact,
+  main > section:last-of-type {
+    min-height: calc(100vh - 88px) !important;
+    box-sizing: border-box !important;
+    padding-top: 112px !important;
+    padding-bottom: 96px !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+  main section#contact > div,
+  main > section:last-of-type > div {
+    width: 100% !important;
+    transform: none !important;
+  }
+  main section#contact .grid,
+  main > section:last-of-type .grid {
+    align-items: center !important;
+  }
+  main section#contact .grid > *,
+  main > section:last-of-type .grid > * {
+    align-self: center !important;
+  }'''
+          if old in s:
+              s = s.replace(old, new, 1)
+          elif "Desktop contact area: vertically center the three cards" not in s:
+              marker = '  main section#contact {\n'
+              if marker not in s:
+                  raise SystemExit("Could not locate contact CSS block")
+          p.write_text(s, encoding="utf-8")
+      - name: Commit and push patch
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- src/server.ts; then
+            echo "No contact layout change needed"
+            exit 0
+          fi
+          git add src/server.ts
+          git commit -m "Fix desktop contact card vertical alignment"
+          git push
