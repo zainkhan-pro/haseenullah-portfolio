@@ -50,7 +50,7 @@ function injectHomepageSeo(html: string): string {
     "Haseen Ullah is an HSE Officer and safety professional in Saudi Arabia with experience in construction, infrastructure and site safety.";
 
   const fixes = `
-<style id="portfolio-final-fixes-v6">
+<style id="portfolio-final-fixes-v7">
 html, body { overflow-x: hidden; }
 
 @media (min-width: 1024px) {
@@ -122,8 +122,9 @@ html, body { overflow-x: hidden; }
   header nav > div:last-child > button { display: none !important; }
   main section[id] { scroll-margin-top: 96px !important; }
 
-  /* Contact: use the full viewport instead of leaving the cards stuck at the top. */
-  main section#contact {
+  /* Contact layout: location first, email directly underneath, CTA balanced on the right. */
+  main section#contact,
+  main > section:last-of-type {
     min-height: calc(100vh - 88px) !important;
     box-sizing: border-box !important;
     padding-top: 96px !important;
@@ -131,18 +132,47 @@ html, body { overflow-x: hidden; }
     display: flex !important;
     align-items: center !important;
   }
-  main section#contact > div {
+  main section#contact > div,
+  main > section:last-of-type > div {
     width: 100% !important;
     transform: none !important;
   }
-  main section#contact > div > .reveal:first-child {
-    margin-top: 0 !important;
-  }
-  main section#contact .grid {
+  main section#contact .grid,
+  main > section:last-of-type .grid {
     align-items: center !important;
   }
-  main section#contact .grid > * {
+  main section#contact .grid > *,
+  main > section:last-of-type .grid > * {
     align-self: center !important;
+  }
+
+  /* The two contact cards on the left must be stacked: Location on top, Email below. */
+  main section#contact .grid > div:first-child,
+  main > section:last-of-type .grid > div:first-child {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: center !important;
+    gap: 16px !important;
+  }
+  main section#contact .grid > div:first-child > *,
+  main > section:last-of-type .grid > div:first-child > * {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Keep the email address readable and prevent ugly mid-word wrapping. */
+  main section#contact a[href^="mailto:"],
+  main > section:last-of-type a[href^="mailto:"] {
+    white-space: nowrap !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+  }
+  main section#contact a[href^="mailto:"] *,
+  main > section:last-of-type a[href^="mailto:"] * {
+    white-space: nowrap !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
   }
 }
 
