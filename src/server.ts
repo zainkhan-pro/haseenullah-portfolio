@@ -26,15 +26,10 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   if (response.status < 500) return response;
   const contentType = response.headers.get("content-type") ?? "";
   if (!contentType.includes("application/json")) return response;
-
   const body = await response.clone().text();
   if (!isH3SwallowedErrorBody(body)) return response;
-
   console.error(consumeLastCapturedError() ?? new Error(`h3 swallowed SSR error: ${body}`));
-  return new Response(renderErrorPage(), {
-    status: 500,
-    headers: { "content-type": "text/html; charset=utf-8" },
-  });
+  return new Response(renderErrorPage(), { status: 500, headers: { "content-type": "text/html; charset=utf-8" } });
 }
 
 function isH3SwallowedErrorBody(body: string): boolean {
@@ -48,14 +43,12 @@ function isH3SwallowedErrorBody(body: string): boolean {
 
 function injectHomepageSeo(html: string): string {
   const title = "Haseen Ullah | HSE Officer | Saudi Arabia";
-  const description =
-    "Haseen Ullah is an HSE Officer and safety professional in Saudi Arabia with experience in construction, infrastructure and site safety.";
-  const responsiveFixes = `
-<style id="portfolio-responsive-fixes">
-html { overflow-x: hidden; }
-body { overflow-x: hidden; }
+  const description = "Haseen Ullah is an HSE Officer and safety professional in Saudi Arabia with experience in construction, infrastructure and site safety.";
 
-/* Desktop/tablet-wide: keep the complete original navigation visible. */
+  const fixes = `
+<style id="portfolio-final-fixes">
+html, body { overflow-x: hidden; }
+
 @media (min-width: 1024px) {
   header nav {
     min-height: 88px !important;
@@ -66,10 +59,7 @@ body { overflow-x: hidden; }
     overflow: visible !important;
   }
   header nav > a { flex: 0 0 auto !important; }
-  header nav > a > span:last-child {
-    white-space: nowrap !important;
-    font-size: 14px !important;
-  }
+  header nav > a > span:last-child { white-space: nowrap !important; font-size: 14px !important; }
   header nav > div:nth-of-type(1) {
     display: flex !important;
     align-items: center !important;
@@ -80,22 +70,37 @@ body { overflow-x: hidden; }
     white-space: nowrap !important;
   }
   header nav > div:nth-of-type(1) a {
+    position: relative !important;
     display: inline-flex !important;
     align-items: center !important;
+    justify-content: center !important;
     white-space: nowrap !important;
     flex: 0 0 auto !important;
+    font-family: 'IBM Plex Mono', monospace !important;
     font-size: clamp(11px, .82vw, 14px) !important;
-    font-weight: 600 !important;
-    letter-spacing: .065em !important;
+    font-weight: 700 !important;
+    letter-spacing: .075em !important;
     line-height: 1 !important;
-    padding-top: 2px !important;
-    padding-bottom: 2px !important;
+    padding: 12px 2px !important;
+    color: #b8b4aa !important;
+    opacity: 1 !important;
     transition: color .2s ease, text-shadow .2s ease !important;
   }
   header nav > div:nth-of-type(1) a:hover,
   header nav > div:nth-of-type(1) a.is-active {
     color: #facc15 !important;
-    text-shadow: 0 0 18px rgba(250, 204, 21, .18) !important;
+    text-shadow: 0 0 14px rgba(250,204,21,.28) !important;
+  }
+  header nav > div:nth-of-type(1) a.is-active::after {
+    content: '' !important;
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 3px !important;
+    height: 2px !important;
+    border-radius: 999px !important;
+    background: #facc15 !important;
+    box-shadow: 0 0 10px rgba(250,204,21,.4) !important;
   }
   header nav > div:last-child {
     display: flex !important;
@@ -110,29 +115,18 @@ body { overflow-x: hidden; }
     padding-right: 13px !important;
     white-space: nowrap !important;
   }
-  header nav > div:last-child > button {
-    display: none !important;
-  }
+  header nav > div:last-child > button { display: none !important; }
 
-  /* Desktop contact composition: move the cards down into the visual center and remove the large empty lower area. */
+  main section[id] { scroll-margin-top: 96px !important; }
+
   main section#contact {
     padding-top: 132px !important;
     padding-bottom: 72px !important;
   }
-  main section#contact > div {
-    transform: translateY(24px) !important;
-  }
-  main section#contact .grid {
-    align-items: start !important;
-  }
-
-  /* Keep anchored sections clear of the fixed desktop header. */
-  main section[id] {
-    scroll-margin-top: 92px !important;
-  }
+  main section#contact > div { transform: translateY(24px) !important; }
+  main section#contact .grid { align-items: start !important; }
 }
 
-/* Mobile/narrow: hide the desktop links and show the original hamburger button. */
 @media (max-width: 1023px) {
   header nav {
     min-height: 72px !important;
@@ -142,65 +136,22 @@ body { overflow-x: hidden; }
     flex-wrap: nowrap !important;
     overflow: visible !important;
   }
-  header nav > a {
-    flex: 0 0 auto !important;
-    min-width: 0 !important;
-  }
-  header nav > a > span:last-child {
-    white-space: nowrap !important;
-  }
-  header nav > div:nth-of-type(1) {
-    display: none !important;
-  }
-  header nav > div:last-child {
-    display: flex !important;
-    align-items: center !important;
-    margin-left: auto !important;
-    flex: 0 0 auto !important;
-    gap: 8px !important;
-  }
-  header nav > div:last-child > a {
-    display: none !important;
-  }
-  header nav > div:last-child > button {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 44px !important;
-    height: 44px !important;
-    flex: 0 0 44px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  /* Prevent the hero grid from keeping desktop-sized offsets on phones. */
-  main {
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: hidden !important;
-  }
-  main section {
-    max-width: 100% !important;
-  }
+  header nav > a { flex: 0 0 auto !important; min-width: 0 !important; }
+  header nav > a > span:last-child { white-space: nowrap !important; }
+  header nav > div:nth-of-type(1) { display: none !important; }
+  header nav > div:last-child { display: flex !important; align-items: center !important; margin-left: auto !important; flex: 0 0 auto !important; gap: 8px !important; }
+  header nav > div:last-child > a { display: none !important; }
+  header nav > div:last-child > button { display: flex !important; align-items: center !important; justify-content: center !important; width: 44px !important; height: 44px !important; flex: 0 0 44px !important; margin: 0 !important; padding: 0 !important; }
+  main { width: 100% !important; max-width: 100% !important; overflow-x: hidden !important; }
+  main section { max-width: 100% !important; }
 }
 
 @media (max-width: 767px) {
-  header nav {
-    min-height: 68px !important;
-    padding-left: 12px !important;
-    padding-right: 12px !important;
-  }
-  header nav > a > span:last-child {
-    font-size: 13px !important;
-  }
-  header nav > div:last-child > button {
-    width: 42px !important;
-    height: 42px !important;
-    flex-basis: 42px !important;
-  }
+  header nav { min-height: 68px !important; padding-left: 12px !important; padding-right: 12px !important; }
+  header nav > a > span:last-child { font-size: 13px !important; }
+  header nav > div:last-child > button { width: 42px !important; height: 42px !important; flex-basis: 42px !important; }
 }
 
-/* Certificate viewer: fit the complete certificate inside the viewport. */
 body > div.fixed.inset-0,
 body > div[class*="fixed"][class*="inset-0"] {
   overflow: auto !important;
@@ -216,66 +167,74 @@ body > div[class*="fixed"][class*="inset-0"] img {
   object-fit: contain !important;
   margin: auto !important;
 }
-
 @media (max-width: 767px) {
   body > div.fixed.inset-0,
-  body > div[class*="fixed"][class*="inset-0"] {
-    padding: 72px 10px 16px !important;
-  }
+  body > div[class*="fixed"][class*="inset-0"] { padding: 72px 10px 16px !important; }
   body > div.fixed.inset-0 img,
-  body > div[class*="fixed"][class*="inset-0"] img {
-    max-height: calc(100vh - 90px) !important;
-  }
+  body > div[class*="fixed"][class*="inset-0"] img { max-height: calc(100vh - 90px) !important; }
 }
 </style>
 <script>
 (function () {
-  function initPortfolioNav() {
-    var links = Array.prototype.slice.call(document.querySelectorAll('header nav > div:nth-of-type(1) a[href^="#"]'));
+  function setupNavigation() {
+    var nav = document.querySelector('header nav');
+    if (!nav) return;
+    var links = Array.prototype.slice.call(nav.querySelectorAll('a[href^="#"]')).filter(function (a) {
+      return a.closest('div') && a.closest('div') !== nav;
+    });
+    var sectionIds = ['profile','certification','certificates','competencies','fieldkit','education'];
+    links = links.filter(function (a) { return sectionIds.indexOf((a.getAttribute('href') || '').slice(1)) !== -1; });
     if (!links.length) return;
 
-    var setActive = function (id) {
+    function activate(id) {
       links.forEach(function (link) {
-        var active = link.getAttribute('href') === '#' + id;
+        var active = (link.getAttribute('href') || '').slice(1) === id;
         link.classList.toggle('is-active', active);
-        if (active) link.setAttribute('aria-current', 'page');
+        if (active) link.setAttribute('aria-current', 'location');
         else link.removeAttribute('aria-current');
       });
-    };
+    }
 
     links.forEach(function (link) {
-      link.addEventListener('click', function () {
-        var target = link.getAttribute('href');
-        if (target && target.charAt(0) === '#') setActive(target.slice(1));
+      link.addEventListener('click', function (event) {
+        var id = (link.getAttribute('href') || '').slice(1);
+        var target = document.getElementById(id);
+        if (!target) return;
+        event.preventDefault();
+        activate(id);
+        var y = target.getBoundingClientRect().top + window.pageYOffset - 92;
+        window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+        try { history.pushState(null, '', '#' + id); } catch (e) {}
       });
     });
 
-    if ('IntersectionObserver' in window) {
-      var sections = links.map(function (link) {
-        return document.getElementById(link.getAttribute('href').slice(1));
-      }).filter(Boolean);
-
-      var observer = new IntersectionObserver(function (entries) {
-        var visible = entries.filter(function (entry) { return entry.isIntersecting; });
-        if (!visible.length) return;
-        visible.sort(function (a, b) { return b.intersectionRatio - a.intersectionRatio; });
-        setActive(visible[0].target.id);
-      }, { rootMargin: '-28% 0px -58% 0px', threshold: [0.05, 0.2, 0.5] });
-
-      sections.forEach(function (section) { observer.observe(section); });
+    function updateFromScroll() {
+      var bestId = 'profile';
+      var bestDistance = Infinity;
+      sectionIds.forEach(function (id) {
+        var section = document.getElementById(id);
+        if (!section) return;
+        var distance = Math.abs(section.getBoundingClientRect().top - 105);
+        if (section.getBoundingClientRect().top <= 170 && distance < bestDistance) {
+          bestDistance = distance;
+          bestId = id;
+        }
+      });
+      activate(bestId);
     }
 
-    var initial = window.location.hash ? window.location.hash.slice(1) : 'profile';
-    setActive(initial || 'profile');
-    window.addEventListener('hashchange', function () {
-      setActive(window.location.hash.slice(1) || 'profile');
-    });
+    var hash = (window.location.hash || '').slice(1);
+    activate(sectionIds.indexOf(hash) >= 0 ? hash : 'profile');
+    window.addEventListener('scroll', updateFromScroll, { passive: true });
+    window.addEventListener('hashchange', function () { activate((window.location.hash || '').slice(1) || 'profile'); });
+    updateFromScroll();
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initPortfolioNav);
-  else initPortfolioNav();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupNavigation);
+  else setupNavigation();
 })();
 </script>`;
+
   const seoHead =
     '<link rel="canonical" href="https://haseenullah.vercel.app/" />' +
     '<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />' +
@@ -283,7 +242,7 @@ body > div[class*="fixed"][class*="inset-0"] img {
     '<meta property="og:site_name" content="Haseen Ullah" />' +
     '<meta property="og:type" content="profile" />' +
     '<meta name="twitter:url" content="https://haseenullah.vercel.app/" />' +
-    responsiveFixes +
+    fixes +
     '<script type="application/ld+json">' +
     JSON.stringify({
       "@context": "https://schema.org",
@@ -299,24 +258,9 @@ body > div[class*="fixed"][class*="inset-0"] img {
         "url": "https://haseenullah.vercel.app/",
         "email": "malikhaseen456@gmail.com",
         "telephone": "+966 534 023 691",
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": "Al Wajh",
-          "addressRegion": "Tabuk",
-          "addressCountry": "SA"
-        },
+        "address": { "@type": "PostalAddress", "addressLocality": "Al Wajh", "addressRegion": "Tabuk", "addressCountry": "SA" },
         "sameAs": ["https://www.linkedin.com/in/haseen-ullah-hse"],
-        "knowsAbout": [
-          "Health and Safety",
-          "HSE Compliance",
-          "Risk Assessment",
-          "Hazard Identification",
-          "Incident Investigation",
-          "Safety Audits",
-          "Toolbox Talks",
-          "Emergency Response",
-          "PPE and Hazard Control"
-        ]
+        "knowsAbout": ["Health and Safety","HSE Compliance","Risk Assessment","Hazard Identification","Incident Investigation","Safety Audits","Toolbox Talks","Emergency Response","PPE and Hazard Control"]
       }
     }) +
     '</script>';
@@ -333,7 +277,6 @@ body > div[class*="fixed"][class*="inset-0"] img {
   result = result.replace(/<img(?![^>]*\bwidth=)([^>]*aspect-square[^>]*)>/g, '<img width="800" height="800"$1>');
   result = result.replace(/<img(?![^>]*\bwidth=)([^>]*aspect-\[4\/3\][^>]*)>/g, '<img width="800" height="600"$1>');
   result = result.replace(/<img(?![^>]*\bwidth=)([^>]*)>/g, '<img width="1200" height="800"$1>');
-
   return result;
 }
 
@@ -359,27 +302,16 @@ export default {
           '<link rel="shortcut icon" type="image/svg+xml" href="/hse-favicon.svg?v=4" />' +
           '<link rel="apple-touch-icon" href="/hse-favicon.svg?v=4" />';
         const html = injectHomepageSeo(siteHtml.default.replace("<head>", `<head>${faviconLinks}`));
-        return new Response(html, {
-          headers: { "content-type": "text/html; charset=utf-8" },
-        });
+        return new Response(html, { headers: { "content-type": "text/html; charset=utf-8" } });
       }
-
       const landingPage = landingPages[url.pathname];
-      if (landingPage) {
-        return new Response(landingPage, {
-          headers: { "content-type": "text/html; charset=utf-8" },
-        });
-      }
-
+      if (landingPage) return new Response(landingPage, { headers: { "content-type": "text/html; charset=utf-8" } });
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
     } catch (error) {
       console.error(error);
-      return new Response(renderErrorPage(), {
-        status: 500,
-        headers: { "content-type": "text/html; charset=utf-8" },
-      });
+      return new Response(renderErrorPage(), { status: 500, headers: { "content-type": "text/html; charset=utf-8" } });
     }
   },
 };
