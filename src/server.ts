@@ -55,10 +55,10 @@ function injectHomepageSeo(html: string): string {
 html { overflow-x: hidden; }
 body { overflow-x: hidden; }
 
-/* Keep the complete original desktop navigation visible at 100% zoom.
-   Nothing is replaced by the hamburger menu on desktop. */
-@media (min-width: 900px) {
+/* Desktop/tablet-wide: keep the complete original navigation visible. */
+@media (min-width: 1024px) {
   header nav {
+    min-height: 88px !important;
     padding-left: 18px !important;
     padding-right: 18px !important;
     gap: 10px !important;
@@ -74,17 +74,19 @@ body { overflow-x: hidden; }
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: clamp(10px, 1.25vw, 20px) !important;
+    gap: clamp(8px, 1.05vw, 18px) !important;
     flex: 1 1 auto !important;
     min-width: 0 !important;
     white-space: nowrap !important;
   }
   header nav > div:nth-of-type(1) a {
     display: inline-flex !important;
+    align-items: center !important;
     white-space: nowrap !important;
     flex: 0 0 auto !important;
-    font-size: clamp(10px, .82vw, 13px) !important;
-    letter-spacing: .07em !important;
+    font-size: clamp(10px, .78vw, 13px) !important;
+    letter-spacing: .065em !important;
+    line-height: 1 !important;
   }
   header nav > div:last-child {
     display: flex !important;
@@ -94,6 +96,7 @@ body { overflow-x: hidden; }
   }
   header nav > div:last-child > a {
     display: inline-flex !important;
+    align-items: center !important;
     padding-left: 13px !important;
     padding-right: 13px !important;
     white-space: nowrap !important;
@@ -103,34 +106,72 @@ body { overflow-x: hidden; }
   }
 }
 
-/* On narrower screens, keep the full navigation instead of showing the three-line menu.
-   The bar can scroll horizontally when necessary. */
-@media (max-width: 899px) {
+/* Mobile/narrow: hide the desktop links and show the original hamburger button. */
+@media (max-width: 1023px) {
   header nav {
+    min-height: 72px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    gap: 12px !important;
+    flex-wrap: nowrap !important;
+    overflow: visible !important;
+  }
+  header nav > a {
+    flex: 0 0 auto !important;
+    min-width: 0 !important;
+  }
+  header nav > a > span:last-child {
+    white-space: nowrap !important;
+  }
+  header nav > div:nth-of-type(1) {
+    display: none !important;
+  }
+  header nav > div:last-child {
+    display: flex !important;
+    align-items: center !important;
+    margin-left: auto !important;
+    flex: 0 0 auto !important;
+    gap: 8px !important;
+  }
+  header nav > div:last-child > a {
+    display: none !important;
+  }
+  header nav > div:last-child > button {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 44px !important;
+    height: 44px !important;
+    flex: 0 0 44px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Prevent the hero grid from keeping desktop-sized offsets on phones. */
+  main {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+  main section {
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 767px) {
+  header nav {
+    min-height: 68px !important;
     padding-left: 12px !important;
     padding-right: 12px !important;
-    gap: 12px !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    justify-content: flex-start !important;
-    scrollbar-width: none !important;
   }
-  header nav::-webkit-scrollbar { display: none !important; }
-  header nav > a { flex: 0 0 auto !important; }
-  header nav > div:nth-of-type(1) {
-    display: flex !important;
-    flex: 0 0 auto !important;
-    gap: 14px !important;
-    white-space: nowrap !important;
+  header nav > a > span:last-child {
+    font-size: 13px !important;
   }
-  header nav > div:nth-of-type(1) a {
-    display: inline-flex !important;
-    flex: 0 0 auto !important;
-    white-space: nowrap !important;
+  header nav > div:last-child > button {
+    width: 42px !important;
+    height: 42px !important;
+    flex-basis: 42px !important;
   }
-  header nav > div:last-child { flex: 0 0 auto !important; }
-  header nav > div:last-child > button { display: none !important; }
-  header nav > div:last-child > a { display: inline-flex !important; white-space: nowrap !important; }
 }
 
 /* Certificate viewer: fit the complete certificate inside the viewport. */
