@@ -10,7 +10,6 @@ export function StructuredData() {
     description:
       "HSE Officer and Safety Professional with 5+ years of field experience across construction, infrastructure and energy projects in Saudi Arabia and Pakistan.",
     url: siteUrl,
-    image: `${siteUrl}/og-image.svg`,
     email: "mailto:malikhaseen456@gmail.com",
     telephone: "+966 534 023 691",
     address: {
