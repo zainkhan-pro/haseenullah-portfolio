@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: write
+
 jobs:
   fix:
     runs-on: ubuntu-latest
@@ -11,27 +14,44 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Fix certificate viewer script/style boundary
+      - name: Repair certificate viewer and navbar scripts
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p = Path('src/server.ts')
           s = p.read_text()
-          old1 = '\n<style id="portfolio-certificate-viewer-v1">'
-          new1 = '\n</script><style id="portfolio-certificate-viewer-v1">'
-          old2 = '\n</style>\n</script>`;'
-          new2 = '\n</style>`;'
-          if old1 not in s:
-              raise SystemExit('certificate viewer style marker not found')
-          if old2 not in s:
-              raise SystemExit('certificate viewer closing marker not found')
-          s = s.replace(old1, new1, 1)
-          s = s.replace(old2, new2, 1)
+
+          # Ensure the certificate CSS is outside the JavaScript block.
+          marker = '\n<style id="portfolio-certificate-viewer-v1">'
+          if marker in s:
+              s = s.replace(marker, '\n</script><style id="portfolio-certificate-viewer-v1">', 1)
+              closing = '\n</style>\n</script>`;'
+              if closing in s:
+                  s = s.replace(closing, '\n</style>`;', 1)
+
+          # The CSS was accidentally written with literal \\n sequences.
+          start = s.find('<style id="portfolio-certificate-viewer-v1">')
+          if start == -1:
+              raise SystemExit('certificate viewer style block not found')
+          end = s.find('</style>', start)
+          if end == -1:
+              raise SystemExit('certificate viewer style closing tag not found')
+          css = s[start:end + len('</style>')]
+          css = css.replace('\\n', '\n')
+          s = s[:start] + css + s[end + len('</style>'):]
+
+          # The main View Certificate button has no image of its own;
+          # use the first real certificate scan instead of the NEBOSH logo.
+          old = 'var img=(card&&card.querySelector(\'img\')) || (qualification&&qualification.querySelector(\'img\')) || (section&&section.querySelector(\'img\'));'
+          new = 'var img=(card&&card.querySelector(\'img\')) || (btn.closest(\'#certification\') && section && section.querySelector(\'button img\')) || (qualification&&qualification.querySelector(\'img\')) || (section&&section.querySelector(\'img\'));'
+          if old in s:
+              s = s.replace(old, new, 1)
+
           p.write_text(s)
           PY
 
-      - name: Commit fix and remove temporary workflows
+      - name: Commit repair and remove temporary workflow files
         shell: bash
         run: |
           rm -f .github/workflows/fix-certificate-script.yml
@@ -39,5 +59,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add src/server.ts .github/workflows/fix-certificate-script.yml .github/workflows/fix-certificate-script-v2.yml
-          git commit -m "fix: restore certificate viewer execution" || exit 0
+          git commit -m "fix: restore certificate viewer and navbar focus"
           git push
