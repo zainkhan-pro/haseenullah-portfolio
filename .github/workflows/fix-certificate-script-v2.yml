@@ -1,0 +1,43 @@
+name: Repair certificate viewer markup v2
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fix certificate viewer script/style boundary
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('src/server.ts')
+          s = p.read_text()
+          old1 = '\n<style id="portfolio-certificate-viewer-v1">'
+          new1 = '\n</script><style id="portfolio-certificate-viewer-v1">'
+          old2 = '\n</style>\n</script>`;'
+          new2 = '\n</style>`;'
+          if old1 not in s:
+              raise SystemExit('certificate viewer style marker not found')
+          if old2 not in s:
+              raise SystemExit('certificate viewer closing marker not found')
+          s = s.replace(old1, new1, 1)
+          s = s.replace(old2, new2, 1)
+          p.write_text(s)
+          PY
+
+      - name: Commit fix and remove temporary workflows
+        shell: bash
+        run: |
+          rm -f .github/workflows/fix-certificate-script.yml
+          rm -f .github/workflows/fix-certificate-script-v2.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/server.ts .github/workflows/fix-certificate-script.yml .github/workflows/fix-certificate-script-v2.yml
+          git commit -m "fix: restore certificate viewer execution" || exit 0
+          git push
