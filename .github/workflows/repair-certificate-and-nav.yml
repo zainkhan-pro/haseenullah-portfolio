@@ -25,20 +25,20 @@ jobs:
           p = Path('src/server.ts')
           s = p.read_text()
 
-          # Make sure the viewer style block is outside the injected script.
           marker = '<style id="portfolio-certificate-viewer-v1">'
           pos = s.find(marker)
           if pos < 0:
               raise SystemExit('certificate viewer style marker not found')
+
+          # The viewer CSS must be outside the injected JavaScript.
           before = s[:pos]
-          if before.rstrip().endswith('</script>') is False:
+          if not before.rstrip().endswith('</script>'):
               before = before.rstrip() + '\n</script>\n'
           else:
               before = before.rstrip() + '\n'
-          style_and_after = s[pos:]
-          s = before + style_and_after
+          s = before + s[pos:]
 
-          # Turn accidental literal backslash-n text in the CSS into real newlines.
+          # Convert literal backslash-n text inside the viewer CSS to real newlines.
           pos = s.find(marker)
           end = s.find('</style>', pos)
           if pos < 0 or end < 0:
@@ -47,14 +47,15 @@ jobs:
           css_block = css_block.replace('\\n', '\n')
           s = s[:pos] + css_block + s[end + len('</style>'):]
 
-          # The main Certification button has no image inside its own card;
-          # prefer the certificate scan button image before the NEBOSH logo.
+          # The main Certification button should open the first real certificate scan,
+          # not the NEBOSH logo. Certificate cards keep using their own image.
           old = "var img=(card&&card.querySelector('img')) || (qualification&&qualification.querySelector('img')) || (section&&section.querySelector('img'));"
-          new = "var img=(card&&card.querySelector('img')) || (btn.closest('#certification') && section && section.querySelector('button img')) || (qualification&&qualification.querySelector('img')) || (section&&section.querySelector('img'));"
-          s = s.replace(old, new, 1)
+          new = "var img=(card&&card.querySelector('img')) || (btn.closest('#certification') ? (section&&section.querySelector('img')) : null) || (qualification&&qualification.querySelector('img')) || (section&&section.querySelector('img'));"
+          if old in s:
+              s = s.replace(old, new, 1)
 
           p.write_text(s)
-          print('viewer repair applied')
+          print('certificate viewer repair applied')
           PY
 
       - name: Commit repair safely
@@ -67,7 +68,7 @@ jobs:
             echo "No changes needed"
             exit 0
           fi
-          git commit -m "fix: restore certificate viewer and nav interactions"
+          git commit -m "fix: restore certificate viewer"
           git fetch origin main
           git rebase origin/main
           git push origin HEAD:main
