@@ -56,8 +56,45 @@ main{width:100%!important;max-width:100%!important;overflow-x:hidden!important}
 @media(max-width:767px){header nav{min-height:68px!important;padding-left:12px!important;padding-right:12px!important}header nav>div:last-child>button{width:42px!important;height:42px!important;flex-basis:42px!important}main section#contact>.relative>.grid{gap:22px!important}body>div.fixed.inset-0,body>div[class*='fixed'][class*='inset-0']{padding:72px 10px 16px!important}}
 body>div.fixed.inset-0,body>div[class*='fixed'][class*='inset-0']{overflow:auto!important;box-sizing:border-box!important;padding:78px 16px 24px!important}
 body>div.fixed.inset-0 img,body>div[class*='fixed'][class*='inset-0'] img{max-width:min(100%,1100px)!important;max-height:calc(100vh - 110px)!important;width:auto!important;height:auto!important;object-fit:contain!important;margin:auto!important}
+#mobile-menu-panel{display:none!important}
+@media(max-width:1023px){#mobile-menu-panel{display:block!important;position:fixed!important;left:0!important;right:0!important;top:68px!important;z-index:49!important;background:rgba(15,23,42,.97)!important;border-top:1px solid rgba(255,255,255,.1)!important;border-bottom:1px solid rgba(255,255,255,.12)!important;box-shadow:0 18px 35px rgba(0,0,0,.35)!important;transform:translateY(-8px)!important;opacity:0!important;pointer-events:none!important;transition:opacity .18s ease,transform .18s ease!important;backdrop-filter:blur(10px)!important;-webkit-backdrop-filter:blur(10px)!important}#mobile-menu-panel.open{opacity:1!important;transform:translateY(0)!important;pointer-events:auto!important}.mobile-menu-inner{display:flex!important;flex-direction:column!important;padding:10px 16px 16px!important;gap:2px!important}.mobile-menu-inner a{display:flex!important;align-items:center!important;justify-content:space-between!important;padding:13px 10px!important;color:#e5e7eb!important;font-family:monospace!important;font-size:12px!important;text-transform:uppercase!important;letter-spacing:.12em!important;border-bottom:1px solid rgba(255,255,255,.06)!important}.mobile-menu-inner a:active,.mobile-menu-inner a:hover{color:#facc15!important}.mobile-menu-inner .mobile-menu-hire{margin-top:8px!important;background:#facc15!important;color:#111827!important;border:0!important;justify-content:center!important;font-weight:700!important}.mobile-menu-inner .mobile-menu-hire:hover{color:#111827!important;background:#fef3c7!important}}
+@media(min-width:1024px){#mobile-menu-panel{display:none!important}}
+/* Keep costly animated effects from running while they are off-screen. */
+.animate-marquee,.animate-float-y{will-change:transform;backface-visibility:hidden;transform:translateZ(0)}
+section:not(#top){content-visibility:auto;contain-intrinsic-size:900px}
 </style>
 <script>
+(function(){
+  function setupMobileMenu(){
+    var nav=document.querySelector('header nav');
+    if(!nav || nav.dataset.menuReady==='1') return;
+    var btn=nav.querySelector('button[aria-label="Toggle menu"]');
+    if(!btn) return;
+    nav.dataset.menuReady='1';
+    var panel=document.createElement('div');
+    panel.id='mobile-menu-panel';
+    panel.setAttribute('aria-hidden','true');
+    panel.innerHTML='<div class="mobile-menu-inner">'+
+      '<a href="#profile">Profile</a>'+
+      '<a href="#certification">Certification</a>'+
+      '<a href="#certificates">Certificates</a>'+
+      '<a href="#competencies">Competencies</a>'+
+      '<a href="#fieldkit">Field Kit</a>'+
+      '<a href="#education">Education</a>'+
+      '<a href="#contact" class="mobile-menu-hire">Hire Me <span>↗</span></a>'+
+      '</div>';
+    document.body.appendChild(panel);
+    function close(){panel.classList.remove('open');panel.setAttribute('aria-hidden','true');btn.setAttribute('aria-expanded','false');}
+    function toggle(){var open=!panel.classList.contains('open');panel.classList.toggle('open',open);panel.setAttribute('aria-hidden',String(!open));btn.setAttribute('aria-expanded',String(open));}
+    btn.setAttribute('aria-expanded','false');
+    btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();toggle();});
+    panel.addEventListener('click',function(e){var a=e.target.closest('a');if(a)close();});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
+    window.addEventListener('resize',function(){if(window.innerWidth>=1024)close();},{passive:true});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setupMobileMenu);else setupMobileMenu();
+  window.addEventListener('load',setupMobileMenu);
+})();
 (function(){var ids=['profile','certification','certificates','competencies','fieldkit','education'],started=false;function links(){var n=document.querySelector('header nav');if(!n)return[];return Array.prototype.slice.call(n.querySelectorAll('a[href^="#"]')).filter(function(a){return ids.indexOf((a.getAttribute('href')||'').slice(1))!==-1})}function activate(id){links().forEach(function(a){var on=(a.getAttribute('href')||'').slice(1)===id;a.classList.toggle('is-active',on);if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')})}function scrollTo(id,smooth){var t=document.getElementById(id);if(!t)return false;activate(id);window.scrollTo({top:Math.max(0,t.getBoundingClientRect().top+window.pageYOffset-88),behavior:smooth?'smooth':'auto'});return true}function update(){var best='profile',distance=Infinity;ids.forEach(function(id){var s=document.getElementById(id);if(!s)return;var top=s.getBoundingClientRect().top;if(top<=180){var d=Math.abs(top-100);if(d<distance){distance=d;best=id}}});activate(best)}function setup(){if(started||!document.querySelector('header nav'))return;started=true;document.addEventListener('click',function(e){var el=e.target;if(!el||!el.closest)return;var a=el.closest('header nav a[href^="#"]');if(!a)return;var id=(a.getAttribute('href')||'').slice(1);if(ids.indexOf(id)===-1||!document.getElementById(id))return;e.preventDefault();scrollTo(id,true);try{history.replaceState(null,'','#'+id)}catch(_e){}},true);var hash=(window.location.hash||'').slice(1);if(ids.indexOf(hash)!==-1&&document.getElementById(hash))scrollTo(hash,false);else activate('profile');window.addEventListener('scroll',update,{passive:true});window.addEventListener('hashchange',function(){var id=(window.location.hash||'').slice(1);if(ids.indexOf(id)!==-1)scrollTo(id,true)});update()}function boot(){setup();if(!started)setTimeout(boot,100)}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();window.addEventListener('load',boot)})();
 </script>`;
   const seo = '<link rel="canonical" href="https://haseenullah.vercel.app/"/><meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"/><meta property="og:url" content="https://haseenullah.vercel.app/"/><meta property="og:site_name" content="Haseen Ullah"/><meta property="og:type" content="profile"/><meta name="twitter:url" content="https://haseenullah.vercel.app/"/>' + fixes;
