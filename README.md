@@ -1,6 +1,6 @@
 # Welcome
 - **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
+- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight into your repository.
 - **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
 
 ## Development
@@ -20,3 +20,5 @@ npm run dev
 - TypeScript
 - React
 - Tailwind CSS
+
+<!-- Deployment trigger only; portfolio source/design unchanged. -->
