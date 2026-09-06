@@ -14,81 +14,60 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Repair malformed injected script
+      - name: Repair certificate viewer
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p = Path('src/server.ts')
           s = p.read_text()
+
+          # Make sure the viewer style block is outside the injected script.
           marker = '<style id="portfolio-certificate-viewer-v1">'
-          style_pos = s.find(marker)
-          if style_pos < 0:
+          pos = s.find(marker)
+          if pos < 0:
               raise SystemExit('certificate viewer style marker not found')
-          start = s.rfind('(function(){', 0, style_pos)
-          if start < 0:
-              raise SystemExit('certificate viewer IIFE start not found')
-          prefix = s[:start]
-          prefix = prefix.rstrip('\\n') + '\n'
-          certificate_js = r'''(function(){
-            function setupCertificateViewer(){
-              if(document.documentElement.dataset.certViewerReady==='1') return;
-              var section=document.getElementById('certificates');
-              var qualification=document.getElementById('certification');
-              if(!section && !qualification) return;
-              document.documentElement.dataset.certViewerReady='1';
-              var modal=document.createElement('div');
-              modal.id='portfolio-certificate-viewer-v1';
-              modal.setAttribute('aria-hidden','true');
-              modal.innerHTML='<div class="pcv-backdrop"></div><div class="pcv-dialog" role="dialog" aria-modal="true" aria-label="Certificate viewer"><button type="button" class="pcv-close" aria-label="Close certificate viewer">×</button><div class="pcv-title">Certificate Preview</div><div class="pcv-frame"><img class="pcv-image" alt="Certificate preview"></div></div>';
-              document.body.appendChild(modal);
-              var image=modal.querySelector('.pcv-image');
-              var closeBtn=modal.querySelector('.pcv-close');
-              function close(){modal.classList.remove('open');modal.setAttribute('aria-hidden','true');document.body.style.removeProperty('overflow');}
-              function open(src,alt){if(!src)return;image.src=src;image.alt=alt||'Certificate preview';modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';}
-              function sourceFor(btn){
-                var card=btn.closest('article,.certificate-card,[class*="certificate"]') || btn.parentElement;
-                var img=(card&&card.querySelector('img')) || (qualification&&qualification.querySelector('img')) || (section&&section.querySelector('img'));
-                var src=btn.getAttribute('data-certificate')||btn.getAttribute('data-cert')||btn.getAttribute('data-image')||btn.getAttribute('data-src');
-                if(!src && img) src=img.currentSrc||img.src;
-                return {src:src,alt:img&&img.alt};
-              }
-              closeBtn.addEventListener('click',close);
-              modal.querySelector('.pcv-backdrop').addEventListener('click',close);
-              document.addEventListener('keydown',function(e){if(e.key==='Escape'&&modal.classList.contains('open'))close();});
-              document.addEventListener('click',function(e){
-                var btn=e.target.closest('button,a');
-                if(!btn)return;
-                var text=(btn.textContent||'').trim();
-                if(!/view certificate/i.test(text))return;
-                var inCert=btn.closest('#certification,#certificates');
-                if(!inCert)return;
-                var item=sourceFor(btn);
-                if(!item.src)return;
-                e.preventDefault();
-                e.stopPropagation();
-                open(item.src,item.alt);
-              },true);
-            }
-            if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setupCertificateViewer);else setupCertificateViewer();
-            window.addEventListener('load',setupCertificateViewer);
-          })();
-          '''
-          suffix = s[style_pos:]
-          if '<style id="portfolio-certificate-viewer-v1">' in suffix:
-              suffix = '</script>\n' + suffix
-          s = prefix + certificate_js + suffix
+          before = s[:pos]
+          if before.rstrip().endswith('</script>') is False:
+              before = before.rstrip() + '\n</script>\n'
+          else:
+              before = before.rstrip() + '\n'
+          style_and_after = s[pos:]
+          s = before + style_and_after
+
+          # Turn accidental literal backslash-n text in the CSS into real newlines.
+          pos = s.find(marker)
+          end = s.find('</style>', pos)
+          if pos < 0 or end < 0:
+              raise SystemExit('certificate viewer style block is incomplete')
+          css_block = s[pos:end + len('</style>')]
+          css_block = css_block.replace('\\n', '\n')
+          s = s[:pos] + css_block + s[end + len('</style>'):]
+
+          # The main Certification button has no image inside its own card;
+          # prefer the certificate scan button image before the NEBOSH logo.
+          old = "var img=(card&&card.querySelector('img')) || (qualification&&qualification.querySelector('img')) || (section&&section.querySelector('img'));"
+          new = "var img=(card&&card.querySelector('img')) || (btn.closest('#certification') && section && section.querySelector('button img')) || (qualification&&qualification.querySelector('img')) || (section&&section.querySelector('img'));"
+          s = s.replace(old, new, 1)
+
           p.write_text(s)
-          print('certificate viewer repaired; script/style boundary restored')
+          print('viewer repair applied')
           PY
 
-      - name: Commit repair
+      - name: Commit repair safely
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add src/server.ts
-          git diff --cached --quiet && { echo "No changes needed"; exit 0; }
+          if git diff --cached --quiet; then
+            echo "No changes needed"
+            exit 0
+          fi
           git commit -m "fix: restore certificate viewer and nav interactions"
-          git push origin main
+          git fetch origin main
+          git rebase origin/main
+          git push origin HEAD:main
