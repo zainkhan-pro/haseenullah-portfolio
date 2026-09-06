@@ -21,6 +21,9 @@ function injectHomepageSeo(html: string): string {
   const fixes = `
 <style id="portfolio-final-fixes-v11">
 html,body{overflow-x:hidden}
+/* Keep the server-rendered portfolio visible even if the client hydration bundle fails. */
+.reveal{opacity:1!important;visibility:visible!important;transform:none!important}
+.reveal-left,.reveal-right{opacity:1!important;visibility:visible!important;transform:none!important}
 @media (min-width:1024px){
 header nav{display:flex!important;align-items:center!important;gap:0!important}
 header nav>a:first-child{flex:0 0 auto!important;display:flex!important;align-items:center!important}
